@@ -2,6 +2,7 @@ package com.proyecto_bases2.ws;
 
 import com.google.gson.Gson;
 import com.proyecto_bases2.models.Client;
+import com.proyecto_bases2.models.User;
 import com.proyecto_bases2.services.DbService;
 
 import javax.ws.rs.GET;
@@ -16,11 +17,11 @@ public class ClientResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String getClients() throws SQLException {
+    public String getClients(User user) throws SQLException {
       ArrayList<Client> clientList;
       String clientsJson;
 
-      DbService dbService = new DbService();
+      DbService dbService = new DbService(user);
       clientList = dbService.getAllClients();
       clientsJson = new Gson().toJson(clientList);
       return clientsJson;

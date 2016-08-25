@@ -3,27 +3,37 @@ package com.proyecto_bases2.services;
 import com.proyecto_bases2.db_connector.OracleDbConnector;
 import com.proyecto_bases2.models.Client;
 import com.proyecto_bases2.models.Instrumet;
+import com.proyecto_bases2.models.User;
 import oracle.jdbc.OracleTypes;
 
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 
 public class DbService {
 
   private OracleDbConnector oracleDbConnector;
   private static final String SELECT_ALL_CLIENTS = "SELECT * FROM CLIENTE";
-
   public static final String SELECT_INSTRUMENTS = "{call proyecto.pck_admin.consInstrumento(?, ?)}";
 
   public DbService(OracleDbConnector dbConnector) {
     oracleDbConnector = dbConnector;
   }
 
-  public DbService() {
-    this.oracleDbConnector = new OracleDbConnector();
+  public DbService(User user) {
+    this.oracleDbConnector = new OracleDbConnector(user);
+  }
+
+  public boolean userExists(User user) {
+    boolean result = false;
+    try {
+      if (oracleDbConnector.getOracleConnection().isValid(1)) {
+        result = true;
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } finally {
+      return result;
+    }
   }
 
   public ArrayList<Client> getAllClients() throws SQLException {
