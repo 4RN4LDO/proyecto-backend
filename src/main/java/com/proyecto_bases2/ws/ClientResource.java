@@ -11,7 +11,7 @@ import javax.ws.rs.core.MediaType;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-@Path("client")
+@Path("v1/client")
 public class ClientResource {
 
     @GET
