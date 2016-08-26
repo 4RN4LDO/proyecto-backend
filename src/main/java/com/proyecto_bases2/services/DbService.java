@@ -17,6 +17,8 @@ public class DbService {
   public static final String SELECT_INSTRUMENTS = "{call proyecto.pck_admin.consInstrumento(?, ?)}";
   //call events
   public static final String SELECT_EVENTS_BY_ID = "{call proyecto.pck_presentador.getEventoTipoPresentador(?, ?, ?, ?)}";
+  //call client events
+  public static final String SELECT_CLIENT_EVENTS_BY_ID = "{call proyecto.pck_cliente.consEventoCliente(?, ?, ?, ?, ?)}";
 
   public DbService(OracleDbConnector dbConnector) {
     oracleDbConnector = dbConnector;
@@ -91,6 +93,34 @@ public class DbService {
       sqlex.printStackTrace();
     }
     return evento;
+  }
+
+  public ClientEvent getClientEvent(String id) {
+
+    String date;
+    String time;
+    ClientEvent client = null;
+    String place;
+    String stat;
+    try {
+      CallableStatement stproc_stmt = oracleDbConnector.getOracleConnection().prepareCall(SELECT_CLIENT_EVENTS_BY_ID);
+      stproc_stmt.setInt(1, Integer.parseInt(id));
+      stproc_stmt.registerOutParameter(2, OracleTypes.DATE);
+      stproc_stmt.registerOutParameter(3, OracleTypes.TIMESTAMP);
+      stproc_stmt.registerOutParameter(4, OracleTypes.VARCHAR);
+      stproc_stmt.registerOutParameter(5, OracleTypes.VARCHAR);
+      stproc_stmt.execute();
+      date = stproc_stmt.getString(2);
+      time = stproc_stmt.getString(3);
+      place = stproc_stmt.getString(4);
+      stat = stproc_stmt.getString(5);
+
+      client = new ClientEvent(date, time, place, stat);
+
+    }catch (SQLException sqlex) {
+      sqlex.printStackTrace();
+    }
+    return client;
   }
 
 
