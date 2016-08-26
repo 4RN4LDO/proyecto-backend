@@ -1,9 +1,8 @@
 package com.proyecto_bases2.services;
 
+import com.google.gson.Gson;
 import com.proyecto_bases2.db_connector.OracleDbConnector;
-import com.proyecto_bases2.models.Client;
-import com.proyecto_bases2.models.Instrumet;
-import com.proyecto_bases2.models.User;
+import com.proyecto_bases2.models.*;
 import oracle.jdbc.OracleTypes;
 
 import java.sql.*;
@@ -12,8 +11,12 @@ import java.util.ArrayList;
 public class DbService {
 
   private OracleDbConnector oracleDbConnector;
+  //call all clients
   private static final String SELECT_ALL_CLIENTS = "SELECT * FROM CLIENTE";
+  //call an specific instrument
   public static final String SELECT_INSTRUMENTS = "{call proyecto.pck_admin.consInstrumento(?, ?)}";
+  //call events
+  public static final String SELECT_EVENTS_BY_ID = "{call proyecto.pck_presentador.getEventoTipoPresentador(?, ?, ?, ?)}";
 
   public DbService(OracleDbConnector dbConnector) {
     oracleDbConnector = dbConnector;
@@ -62,26 +65,34 @@ public class DbService {
       result = stproc_stmt.getString(2);
     } catch (SQLException sqlex) {
       sqlex.printStackTrace();
-
     }
-
     return result;
   }
 
-  public ArrayList<Instrumet> getAnInstrument() throws SQLException {
-    ResultSet selectResult = null;
-    Statement statement = null;
+  public Evento getEvent(String typeId)  {
 
+    String date;
+    String time;
+    Evento evento = null;
+    String place;
     try {
-      statement = oracleDbConnector.getOracleConnection().createStatement();
-      selectResult = statement.executeQuery(SELECT_INSTRUMENTS);
-    } catch (SQLException e) {
-      e.printStackTrace();
+      CallableStatement stproc_stmt = oracleDbConnector.getOracleConnection().prepareCall(SELECT_EVENTS_BY_ID);
+      stproc_stmt.setInt(1, Integer.parseInt(typeId));
+      stproc_stmt.registerOutParameter(2, OracleTypes.DATE);
+      stproc_stmt.registerOutParameter(3, OracleTypes.TIMESTAMP);
+      stproc_stmt.registerOutParameter(4, OracleTypes.VARCHAR);
+      stproc_stmt.execute();
+      date = stproc_stmt.getString(2);
+      time = stproc_stmt.getString(3);
+      place = stproc_stmt.getString(4);
+
+      evento = new Evento(date, time, place);
+    } catch (SQLException sqlex) {
+      sqlex.printStackTrace();
     }
-
-    return createInstrumetList(selectResult);
-
+    return evento;
   }
+
 
   public ArrayList<Client> createClientList(ResultSet resultSet) throws SQLException {
     ArrayList<Client> clientList = new ArrayList<>();
